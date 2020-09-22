@@ -1,31 +1,29 @@
 require('dotenv').config()
-var createError = require('http-errors')
-var express = require('express')
-var path = require('path')
-var cookieParser = require('cookie-parser')
-var logger = require('morgan')
+const createError = require('http-errors')
+const express = require('express')
+const { graphqlHTTP } = require('express-graphql')
 
-var indexRouter = require('./routes/index')
-var usersRouter = require('./routes/users')
+const path = require('path')
+const logger = require('morgan')
 
-const { Sequelize } = require('sequelize')
-// PostgreSQL
-const sequelize = new Sequelize(process.env.DATABASE_URI)
+const graphqlSchema = require('./graphql/schema')
+const graphqlResolver = require('./graphql/resolvers')
 
-var app = express()
-
-// view engine setup
-app.set('views', path.join(__dirname, 'views'))
-app.set('view engine', 'ejs')
+const app = express()
 
 app.use(logger('dev'))
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
-app.use(cookieParser())
 app.use(express.static(path.join(__dirname, 'public')))
 
-app.use('/', indexRouter)
-app.use('/users', usersRouter)
+app.use(
+	'/graphql',
+	graphqlHTTP({
+		schema: graphqlSchema,
+		rootValue: graphqlResolver,
+		graphiql: true,
+	})
+)
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
@@ -39,8 +37,11 @@ app.use(function (err, req, res, next) {
 	res.locals.error = req.app.get('env') === 'development' ? err : {}
 
 	// render the error page
-	res.status(err.status || 500)
-	res.render('error')
+	res.status(err.status || 500).json({ message: err.message })
 })
 
-module.exports = { app, sequelize }
+PORT = process.env.PORT || 5000
+
+app.listen(PORT, async () => {
+	console.log(`Listing on port ${PORT}`)
+})

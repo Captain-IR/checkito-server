@@ -13,6 +13,10 @@ module.exports = {
 				type: Sequelize.STRING,
 				allowNull: false,
 			},
+			completed: {
+				type: Sequelize.BOOLEAN,
+				defaultValue: false,
+			},
 			dueDate: Sequelize.STRING,
       dueTime: Sequelize.STRING,
       userId: Sequelize.INTEGER,

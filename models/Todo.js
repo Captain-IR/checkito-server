@@ -1,5 +1,5 @@
 const Sequelize = require('sequelize')
-const { sequelize } = require('../app')
+const sequelize = require('../connection')
 
 module.exports = sequelize.define('todo', {
 	id: {
@@ -14,7 +14,10 @@ module.exports = sequelize.define('todo', {
 		unique: true,
 		allowNull: false,
 	},
-
+	completed: {
+		type: Sequelize.BOOLEAN,
+		defaultValue: false,
+	},
 	dueDate: Sequelize.STRING,
 	dueTime: Sequelize.STRING,
 })

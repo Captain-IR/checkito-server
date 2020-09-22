@@ -1,5 +1,6 @@
 const Sequelize = require('sequelize')
-const { sequelize } = require('../app')
+const sequelize = require('../connection');
+
 
 module.exports = sequelize.define('user', {
 	id: {
