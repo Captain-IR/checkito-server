@@ -1,7 +1,7 @@
 const Sequelize = require('sequelize')
 const { sequelize } = require('../app')
 
-module.exports = sequelize.define('Todo', {
+module.exports = sequelize.define('User', {
 	id: {
 		type: Sequelize.INTEGER,
 		allowNull: false,
@@ -9,12 +9,14 @@ module.exports = sequelize.define('Todo', {
 		primaryKey: true,
 	},
 
-	title: {
+	username: {
 		type: Sequelize.STRING,
-		allowNull: false,
+    allowNull: false,
+    unique: true,
 	},
 
-	dueDate: Sequelize.DATEONLY,
-
-	dueTime: Sequelize.TIME,
+	password: {
+    type: Sequelize.STRING,
+    allowNull: false,
+	},
 })
