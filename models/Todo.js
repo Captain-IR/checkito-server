@@ -1,7 +1,7 @@
 const Sequelize = require('sequelize')
 const { sequelize } = require('../app')
 
-module.exports = sequelize.define('Todo', {
+module.exports = sequelize.define('todo', {
 	id: {
 		type: Sequelize.INTEGER,
 		allowNull: false,
@@ -11,10 +11,10 @@ module.exports = sequelize.define('Todo', {
 
 	title: {
 		type: Sequelize.STRING,
+		unique: true,
 		allowNull: false,
 	},
 
-	dueDate: Sequelize.DATEONLY,
-
-	dueTime: Sequelize.TIME,
+	dueDate: Sequelize.STRING,
+	dueTime: Sequelize.STRING,
 })

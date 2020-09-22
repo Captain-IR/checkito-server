@@ -13,8 +13,8 @@ module.exports = {
 				type: Sequelize.STRING,
 				allowNull: false,
 			},
-			dueDate: Sequelize.DATEONLY,
-      dueTime: Sequelize.TIME,
+			dueDate: Sequelize.STRING,
+      dueTime: Sequelize.STRING,
       userId: Sequelize.INTEGER,
 
 			createdAt: Sequelize.DATE,
