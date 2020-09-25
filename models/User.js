@@ -10,7 +10,7 @@ module.exports = sequelize.define('user', {
 		primaryKey: true,
 	},
 
-	username: {
+	email: {
 		type: Sequelize.STRING,
     allowNull: false,
     unique: true,
