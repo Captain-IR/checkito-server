@@ -1,6 +1,7 @@
 require('dotenv').config()
 const createError = require('http-errors')
 const express = require('express')
+const cors = require('cors')
 const { graphqlHTTP } = require('express-graphql')
 
 const path = require('path')
@@ -11,6 +12,7 @@ const graphqlResolver = require('./graphql/resolvers')
 
 const app = express()
 
+app.use(cors())
 app.use(logger('dev'))
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))

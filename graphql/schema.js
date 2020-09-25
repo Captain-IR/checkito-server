@@ -13,21 +13,26 @@ module.exports = buildSchema(`
     completed: Boolean!
     dueDate: String
     dueTime: String
+    createdAt: String
+    updatedAt: String
   }
 
   input TodoInputData {
-    title: String!
+    title: String
     completed: Boolean
     dueDate: String
     dueTime: String
   }
 
   type Query {
-    todo: Todo
-    user: User
+    todos: [Todo!]!
+    todo(id: ID!): Todo!
+    user(id: ID!): User!
   }
 
   type Mutation {
     createTodo(todoInput: TodoInputData!): Todo!
+    updateTodo(id: ID!, todoInput: TodoInputData): Todo!
+    deleteTodo(id: ID!): Boolean!
   }
 `)
