@@ -7,6 +7,8 @@ const { graphqlHTTP } = require('express-graphql')
 const path = require('path')
 const logger = require('morgan')
 
+const auth = require('./middleware/auth')
+
 const graphqlSchema = require('./graphql/schema')
 const graphqlResolver = require('./graphql/resolvers')
 
@@ -20,6 +22,7 @@ app.use(express.static(path.join(__dirname, 'public')))
 
 app.use(
 	'/graphql',
+	auth,
 	graphqlHTTP({
 		schema: graphqlSchema,
 		rootValue: graphqlResolver,
