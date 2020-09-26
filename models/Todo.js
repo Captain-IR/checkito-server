@@ -8,7 +8,6 @@ module.exports = sequelize.define('todo', {
 		autoIncrement: true,
 		primaryKey: true,
 	},
-
 	title: {
 		type: Sequelize.STRING,
 		unique: true,
@@ -20,4 +19,5 @@ module.exports = sequelize.define('todo', {
 	},
 	dueDate: Sequelize.STRING,
 	dueTime: Sequelize.STRING,
+	userId: Sequelize.INTEGER,
 })

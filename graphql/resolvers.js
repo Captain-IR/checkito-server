@@ -1,9 +1,13 @@
 const bcrypt = require('bcrypt')
 const validator = require('validator')
 const jwt = require('jsonwebtoken')
+const handleError = require('../functions/error-handler')
 
 const Todo = require('../models/Todo')
 const User = require('../models/User')
+
+User.hasMany(Todo)
+Todo.belongsTo(User)
 
 module.exports = {
 	createUser: async function ({ userInput }, req) {
@@ -18,18 +22,10 @@ module.exports = {
 			errors.push({ message: 'Password too short!' })
 		}
 
-		if (errors.length > 0) {
-			const error = new Error('Invalid input data.')
-			error.data = errors
-			error.status = 422
-			throw error
-		}
+		if (errors.length > 0) handleError('Invalid input data.', 400, errors)
 
 		const existingUser = await User.findOne({ where: { email } })
-		if (existingUser !== null) {
-			const error = new Error('User already exists!')
-			throw error
-		}
+		if (existingUser !== null) handleError('User already exists!', 400)
 
 		const hashedPass = await bcrypt.hash(password, 12)
 		const user = await User.create({ email, password: hashedPass })
@@ -41,18 +37,10 @@ module.exports = {
 		const { email, password } = userInput
 		const user = await User.findOne({ where: { email } })
 
-		if (user === null) {
-			const error = new Error('Invalid email or password')
-			error.code = 401
-			throw error
-		}
+		if (user === null) handleError('Invalid email or password', 400)
 
 		const isEqual = await bcrypt.compare(password, user.password)
-		if (!isEqual) {
-			const error = new Error('Invalid email or password')
-			error.code = 401
-			throw error
-		}
+		if (!isEqual) handleError('Invalid email or password', 400)
 
 		const token = jwt.sign(
 			{
@@ -67,18 +55,23 @@ module.exports = {
 	},
 
 	me: async function (args, req) {
-		console.log(req.isAuth);
 		return req.isAuth
 	},
 
 	todos: async function (args, req) {
-		const todos = await Todo.findAll()
-		// console.log(todos)
-		return todos.map(todo => ({
-			...todo.dataValues,
-			createdAt: todo.dataValues.createdAt.toISOString(),
-			updatedAt: todo.dataValues.updatedAt.toISOString(),
-		}))
+		if (!req.isAuth) handleError('Unauthenticated', 401)
+
+		try {
+			const todos = await Todo.findAll({ where: { userId: req.userId } })
+			return todos.map(todo => ({
+				...todo.dataValues,
+				createdAt: todo.dataValues.createdAt.toISOString(),
+				updatedAt: todo.dataValues.updatedAt.toISOString(),
+			}))
+		} catch (error) {
+			console.log(error)
+			return error
+		}
 	},
 
 	todo: function ({ id }, req) {
@@ -89,33 +82,49 @@ module.exports = {
 	},
 
 	createTodo: async function ({ todoInput }, req) {
-		// console.log(todoInput);
+		if (!req.isAuth) handleError('Unauthenticated!', 401)
 		try {
 			const { title, completed, dueDate, dueTime } = todoInput
-			const todo = await Todo.create({ title, completed, dueDate, dueTime })
+			const todo = await Todo.create({
+				title,
+				completed,
+				dueDate,
+				dueTime,
+				userId: req.userId,
+			})
 			return todo
-		} catch (err) {}
+		} catch (error) {
+			console.log(error)
+			return error
+		}
 	},
 
 	updateTodo: async function ({ id, todoInput }, req) {
-		const todo = await Todo.findOne({ where: { id } })
-		if (!todo) {
-			const error = new Error('No Todo found')
-			error.status = 404
+		if (!req.isAuth) handleError('Unauthenticated', 401)
+		try {
+			const todo = await Todo.findOne({ where: { userId: req.userId } })
+			if (todo === null) handleError('No Todo found', 404)
+
+			await Todo.update(todoInput, { where: { id } })
+			const updatedTodo = await Todo.findOne({ where: { id } })
+			return updatedTodo
+		} catch (error) {
+			console.log(error)
 			return error
 		}
-		await Todo.update(todoInput, { where: { id } })
-		return todo
 	},
 
 	deleteTodo: async function ({ id }, req) {
-		const todo = await Todo.findOne({ where: { id } })
-		if (!todo) {
-			const error = new Error('No Todo found')
-			error.status = 404
+		if (!req.isAuth) handleError('Unauthenticated', 401)
+		try {
+			const todo = await Todo.findOne({ where: { userId: req.userId } })
+			if (!todo) handleError('No Todo found', 404)
+
+			await Todo.destroy({ where: { id } })
+			return true
+		} catch (error) {
+			console.log(error)
 			return error
 		}
-		await Todo.destroy({ where: { id } })
-		return true
 	},
 }
